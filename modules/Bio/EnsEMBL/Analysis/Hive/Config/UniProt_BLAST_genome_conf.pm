@@ -307,9 +307,9 @@ sub pipeline_analyses {
 sub resource_classes {
     my $self = shift;
     return {
-      'default' => { LSF => $self->lsf_resource_builder('production-rh74', 900, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'}], [$self->default_options->{'num_tokens'}])},
-      '4GB' => { LSF => $self->lsf_resource_builder('production-rh74', 4000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
-      '8GB' => { LSF => $self->lsf_resource_builder('production-rh74', 8000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
+      'default' => { LSF => $self->lsf_resource_builder('production', 900, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'}], [$self->default_options->{'num_tokens'}])},
+      '4GB' => { LSF => $self->lsf_resource_builder('production', 4000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
+      '8GB' => { LSF => $self->lsf_resource_builder('production', 8000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
     }
   }
 

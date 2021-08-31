@@ -47,6 +47,7 @@ use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
 
 use parent ('Bio::EnsEMBL::Analysis::Hive::Config::HiveBaseConfig_conf');
 
+use Bio::EnsEMBL::Hive::Version 2.6;
 
 =head2 default_options
 
@@ -63,27 +64,31 @@ sub default_options {
   return {
     %{$self->SUPER::default_options()},
 
-    species => 'clupea_harengus',
+    species => 'sus_scrofa',
 
-    base_dir => '/hps/nobackup2/production/ensembl/thibaut/loutre',
+    base_dir => '/hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/loutre',
     output_dir => catdir($self->o('base_dir'), $self->o('species'), $self->o('db_prefix')),
     blast_db_path => catfile($self->o('output_dir'), $self->o('species').'_softmasked_toplevel.fa'),
-    password => '',
     user => 'ensadmin',
+    password => 'ensembl',
     user_r => 'ensro',
-    pipe_db_host => 'mysql-ens-genebuild-prod-7',
-    pipe_db_port => 4533,
+    password_r => '',
+
+    pipe_db_host => 'mysql-ens-core-prod-1',
+    pipe_db_port => 4524,
 
     db_prefix => $self->o('assembly_version'),
     pipeline_name => 'loutre_ensembl_'.$self->o('species').'_'.$self->o('db_prefix'),
 
     assembly_version => 1,
-    current_release => 101,
+    current_release => 104,
+    #current_db_host => 'mysql-ens-sta-1',
+    #current_db_port => 4519,
     current_db_host => 'mysql-ens-mirror-1',
     current_db_port => 4240,
 
-    havana_db_host => 'mysql-ens-genebuild-prod-2',
-    havana_db_port => 4528,
+    havana_db_host => 'mysql-ens-core-prod-1',
+    havana_db_port => 4524,
 
     ensembl_db_name => $self->o('species').'_core_'.$self->o('current_release').'_'.$self->o('assembly_version'),
     ensembl_db_host => $self->o('current_db_host'),
@@ -103,7 +108,7 @@ sub default_options {
     do_uniprot_run => 1,
     uniprot_set => 'havana_human_blast',
     blast_type => 'ncbi',
-    protein_entry_loc => '/hps/nobackup2/production/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
+    protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
 
     meta_pipeline_db_host => $self->o('pipe_db_host'),
     meta_pipeline_db_port => $self->o('pipe_db_port'),
@@ -131,10 +136,11 @@ sub default_options {
     otter_archive_coord_system_id => 10010,
     gene_number_delimiter => '#',
 
-    meta_pipeline_db_head => "'-dbname' => '#expr(#pipe_db#->{-dbname})expr#', '-host' => '#expr(#pipe_db#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#pipe_db#->{-port})expr#', '-user' => '".$self->o('user_r')."'",
-    meta_pipeline_db_head_rw => "'-dbname' => '#expr(#pipe_db#->{-dbname})expr#', '-host' => '#expr(#pipe_db#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#pipe_db#->{-port})expr#', '-user' => '#expr(#pipe_db#->{-user})expr#', '-pass' => '#expr(#pipe_db#->{-pass})expr#'",
-    meta_core_db_head => "'-dbname' => '#expr(#havana_db#->{-dbname})expr#', '-host' => '#expr(#havana_db#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#havana_db#->{-port})expr#', '-user' => '".$self->o('user_r')."'",
-    meta_intron_db_head => "'-dbname' => '#expr(#rnaseq_db#->{-dbname})expr#', '-host' => '#expr(#rnaseq_db#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#rnaseq_db#->{-port})expr#', '-user' => '".$self->o('user_r')."'",
+
+    meta_pipeline_db_head => "'-dbname' => '".$self->o('pipe_db_name')."', '-host' => '".$self->o('pipe_db_host')."', '-port' => '".$self->o('pipe_db_port')."', '-user' => '".$self->o('user_r')."'",
+    meta_pipeline_db_head_rw => "'-dbname' => '".$self->o('pipe_db_name')."', '-host' => '".$self->o('pipe_db_host')."', '-port' => '".$self->o('pipe_db_port')."', '-user' => '".$self->o('meta_pipeline_db_user')."', '-pass' => '".$self->o('meta_pipeline_db_password')."'",
+    meta_core_db_head => "'-dbname' => '".$self->o('havana_db_name')."', '-host' => '".$self->o('havana_db_host')."', '-port' => '".$self->o('havana_db_port')."', '-user' => '".$self->o('user_r')."'",
+    meta_intron_db_head => "'-dbname' => '".$self->o('rnaseq_db_name')."', '-host' => '".$self->o('rnaseq_db_host')."', '-port' => '".$self->o('rnaseq_db_port')."', '-user' => '".$self->o('user_r')."'",
 
     ensembl_dir => catdir($self->o('enscode_root_dir'), 'ensembl'),
     ensembl_scripts => catdir($self->o('ensembl_dir'), 'misc-scripts'),
@@ -144,6 +150,8 @@ sub default_options {
     havana_db_user => $self->o('user'),
     havana_db_password => $self->o('password'),
     havana_db_driver => $self->o('hive_driver'),
+    havana_db_uri => $self->o('havana_db_driver').'://'.$self->o('user').':'.$self->o('password').'@'.$self->o('havana_db_host').':'.$self->o('havana_db_port').'/',
+
 
     ensembl_db_user => $self->o('user_r'),
     ensembl_db_password => $self->o('password_r'),
@@ -252,6 +260,7 @@ sub default_options {
     },
 
     databases_to_delete => ['havana_db', 'rnaseq_db'],
+
   };
 }
 
@@ -286,7 +295,6 @@ sub pipeline_analyses {
     'legacy_ncbi' => '-a 3 -A 40',
   );
 
-
   my @analyses = (
     {
       -logic_name => 'create_working_directory',
@@ -302,20 +310,32 @@ sub pipeline_analyses {
       -rc_name => 'default',
     },
     {
-      -logic_name => 'create_havana_db',
-      -module     => 'Bio::EnsEMBL::Analysis::Hive::RunnableDB::HiveCreateDatabase',
-      -parameters => {
-        source_db => $self->o('ensembl_db'),
-        target_db => $self->o('havana_db'),
-        create_type => 'copy',
-        _lock_tables => 'false',
-      },
-      -rc_name => 'default',
-      -flow_into => {
-        1 => ['fan_uniprot_run', 'patch_havana_db'],
-      },
+        -logic_name        => 'create_havana_db',
+        -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SqlCmd',
+        -analysis_capacity => 10,
+        -batch_size        => 10,
+        -max_retry_count   => 1,
+        -parameters        => {
+             'db_conn' => $self->o('havana_db_uri'),
+                'sql'     => 'CREATE DATABASE '.$self->o('havana_db_name'),
+        },
+        -flow_into => [ 'copy_havana_db' ],
+        -rc_name => 'default',
     },
     {
+        -logic_name      => 'copy_havana_db',
+        -module          => 'Bio::EnsEMBL::Hive::RunnableDB::DatabaseDumper',
+        -parameters      => {
+                 db_conn      => $self->o('ensembl_db'),
+                 output_db    => $self->o('havana_db'),
+                 dump_options => '--max_allowed_packet=1024M',
+        },
+        -rc_name => '4GB',
+        -flow_into => {
+         1 => ['fan_uniprot_run', 'patch_havana_db'],
+        },
+     },
+     {
       -logic_name => 'fan_uniprot_run',
       -module => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -parameters => {
@@ -558,7 +578,7 @@ sub pipeline_analyses {
       -parameters => {
         inputquery => 'SELECT ga.value FROM gene_attrib ga, attrib_type at WHERE ga.attrib_type_id = at.attrib_type_id AND at.code = "name" GROUP BY ga.value HAVING COUNT(*) > 2',
         db_conn => $self->o('havana_db'),
-        column_names => ['gnee_name'],
+        column_names => ['gene_name'],
       },
       -rc_name => 'default',
       -flow_into => {
@@ -597,12 +617,12 @@ sub pipeline_analyses {
       -logic_name => 'load_pipeline_database_information',
       -module     => 'Bio::EnsEMBL::Hive::RunnableDB::SqlCmd',
       -parameters => {
-        db_conn => $self->o('havana_db'),
-        meta_pipeline_db_head => $self->o('meta_pipeline_db_head'),
+        db_conn                  => $self->o('havana_db'),
+        meta_pipeline_db_head    => $self->o('meta_pipeline_db_head'),
         meta_pipeline_db_head_rw => $self->o('meta_pipeline_db_head_rw'),
-        meta_core_db_head => $self->o('meta_core_db_head'),
-        meta_intron_db_head => $self->o('meta_intron_db_head'),
-        pipe_db => $meta_pipeline_db,
+        meta_core_db_head        => $self->o('meta_core_db_head'),
+        meta_intron_db_head      => $self->o('meta_intron_db_head'),
+        pipe_db                  => $meta_pipeline_db,
         sql => [
           'INSERT INTO meta (species_id, meta_key, meta_value) VALUES (1, "pipeline_db_head", "#meta_pipeline_db_head#")',
           'INSERT INTO meta (species_id, meta_key, meta_value) VALUES (1, "pipeline_db_rw_head", "#meta_pipeline_db_head_rw#")',
@@ -763,7 +783,7 @@ sub pipeline_analyses {
       -logic_name => 'write_anaysis_config',
       -module     => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -parameters => {
-        cmd => 'echo "#config_text# > #output_file#',
+        cmd => 'echo "#config_text#" > #output_file#',
         output_file => catfile($self->o('output_dir'), 'swissprot.part'),
         species => $self->o('species'),
         config_text => '[#species#.filter.#otter_name#]\n
@@ -782,7 +802,7 @@ sub pipeline_analyses {
       -logic_name => 'write_swissprot_anaysis_config',
       -module     => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -parameters => {
-        cmd => 'echo "#config_text# > #output_file#',
+        cmd => 'echo "#config_text#" > #output_file#',
         output_file => catfile($self->o('output_dir'), 'swissprot.part'),
         species => $self->o('species'),
         config_text => '[#species#.filter.SwissProt]\n
@@ -805,7 +825,7 @@ sub pipeline_analyses {
       -logic_name => 'write_trembl_anaysis_config',
       -module     => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -parameters => {
-        cmd => 'echo "#config_text# > #output_file#',
+        cmd => 'echo "#config_text#" > #output_file#',
         output_file => catfile($self->o('output_dir'), 'trembl.part'),
         species => $self->o('species'),
         config_text => '[#species#.filter.TrEMBL]\n
@@ -828,7 +848,7 @@ sub pipeline_analyses {
       -logic_name => 'concat_anaysis_config',
       -module     => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -parameters => {
-        cmd => 'cat "#output_dir#/*.part > #output_file#',
+        cmd => 'cat #output_dir#/*.part > #output_file#',
         output_file => catfile($self->o('output_dir'), 'otter_config.ini'),
         output_dir => $self->o('output_dir'),
       },
@@ -849,11 +869,15 @@ sub resource_classes {
   my ($self) = @_;
 
   return {
-    'default' => { LSF => '-q production-rh74 -M 1000 -R"select[mem>1000] rusage[mem=1000]"'},
-    '4GB' => { LSF => '-q production-rh74 -M 4000 -R"select[mem>4000] rusage[mem=4000]"'},
-    '16GB' => { LSF => '-q production-rh74 -M 16000 -R"select[mem>16000] rusage[mem=16000]"'},
+    'default'  => { LSF => ['-q production -C0 -M 1000 -R"select[mem>1000] rusage[mem=1000]"',
+                    '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
+    '4GB'  => { LSF => ['-q production -C0 -M 4000 -R"select[mem>4000] rusage[mem=4000]"',
+                    '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
+    '16GB' => { LSF => ['-q production -C0 -M 16000 -R"select[mem>16000] rusage[mem16000]"',
+                    '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
   };
 }
 
 1;
+
 
