@@ -42,6 +42,9 @@ sub default_options {
     # Preset variables
     ##########################
 
+    # Hive settings
+    'hive_capacity'        => 100,
+
     # UniProt settings
     'uniprot_set'          => 'havana_teleost_blast', # the UniProt set in the UniProtCladeDownloadStatic config to download
     'uniprot_blast_batch_size' => 10, # number of protein sequences per job
@@ -52,7 +55,7 @@ sub default_options {
     'blast_type' => 'ncbi',
     'blast_exe_path' => catfile($self->o('binary_base'), 'tblastn'),
 
-    protein_entry_loc => '/hps/nobackup2/production/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
+    protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
     load_optimise_script => catfile($self->o('enscode_root_dir'), 'ensembl-analysis', 'scripts', 'genebuild', 'load_external_db_ids_and_optimize_af.pl'),
 
     'blast_db_user'   => $self->o('user'),
@@ -189,6 +192,7 @@ sub pipeline_analyses {
       {
         -logic_name => 'run_uniprot_blast',
         -module     => 'Bio::EnsEMBL::Analysis::Hive::RunnableDB::HiveBlastPepToGenome',
+	-analysis_capacity => 500,
         -parameters => {
                          sequence_table_name => $self->o('uniprot_table_name'),
                          sequence_type => 'peptide',
