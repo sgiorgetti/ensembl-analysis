@@ -192,7 +192,7 @@ sub pipeline_analyses {
       {
         -logic_name => 'run_uniprot_blast',
         -module     => 'Bio::EnsEMBL::Analysis::Hive::RunnableDB::HiveBlastPepToGenome',
-	-analysis_capacity => 500,
+	-analysis_capacity => 200,
         -parameters => {
                          sequence_table_name => $self->o('uniprot_table_name'),
                          sequence_type => 'peptide',

@@ -122,7 +122,7 @@ sub default_options {
     hive_init_script => catfile($self->o('enscode_root_dir'), 'ensembl-hive', 'scripts', 'init_pipeline.pl'),
     hive_beekeeper_script => catfile($self->o('enscode_root_dir'), 'ensembl-hive', 'scripts', 'beekeeper.pl'),
     hive_uniprot_config => 'Bio::EnsEMBL::Analysis::Hive::Config::UniProt_BLAST_genome_conf',
-    meta_hive_capacity => 100,
+    meta_hive_capacity => 50,
 
     email_suffix => 'ebi.ac.uk',
     havana_group_name => 'Havana',
