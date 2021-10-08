@@ -64,7 +64,8 @@ sub default_options {
   return {
     %{$self->SUPER::default_options()},
 
-    species => 'sus_scrofa',
+    #species => 'sus_scrofa',
+    species => 'clupea_harengus',
 
     base_dir => '/hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/loutre',
     output_dir => catdir($self->o('base_dir'), $self->o('species'), $self->o('db_prefix')),
@@ -80,7 +81,7 @@ sub default_options {
     db_prefix => $self->o('assembly_version'),
     pipeline_name => 'loutre_ensembl_'.$self->o('species').'_'.$self->o('db_prefix'),
 
-    assembly_version => 1,
+    assembly_version => 202,
     current_release => 104,
     #current_db_host => 'mysql-ens-sta-1',
     #current_db_port => 4519,
@@ -106,7 +107,8 @@ sub default_options {
     rnaseq_db_port => $self->o('havana_db_port'),
 
     do_uniprot_run => 1,
-    uniprot_set => 'havana_human_blast',
+    #uniprot_set => 'havana_human_blast',
+    uniprot_set => 'fish_complete',
     blast_type => 'ncbi',
     protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
 
@@ -137,9 +139,14 @@ sub default_options {
     gene_number_delimiter => '#',
 
 
-    meta_pipeline_db_head => "'-dbname' => '".$self->o('pipe_db_name')."', '-host' => '".$self->o('pipe_db_host')."', '-port' => '".$self->o('pipe_db_port')."', '-user' => '".$self->o('user_r')."'",
-    meta_pipeline_db_head_rw => "'-dbname' => '".$self->o('pipe_db_name')."', '-host' => '".$self->o('pipe_db_host')."', '-port' => '".$self->o('pipe_db_port')."', '-user' => '".$self->o('meta_pipeline_db_user')."', '-pass' => '".$self->o('meta_pipeline_db_password')."'",
-    meta_core_db_head => "'-dbname' => '".$self->o('havana_db_name')."', '-host' => '".$self->o('havana_db_host')."', '-port' => '".$self->o('havana_db_port')."', '-user' => '".$self->o('user_r')."'",
+    #meta_pipeline_db_head => "'-dbname' => '".$self->o('pipe_db_name')."', '-host' => '".$self->o('pipe_db_host')."', '-port' => '".$self->o('pipe_db_port')."', '-user' => '".$self->o('user_r')."'",
+    #meta_pipeline_db_head_rw => "'-dbname' => '".$self->o('pipe_db_name')."', '-host' => '".$self->o('pipe_db_host')."', '-port' => '".$self->o('pipe_db_port')."', '-user' => '".$self->o('meta_pipeline_db_user')."', '-pass' => '".$self->o('meta_pipeline_db_password')."'",
+    #meta_core_db_head => "'-dbname' => '".$self->o('havana_db_name')."', '-host' => '".$self->o('havana_db_host')."', '-port' => '".$self->o('havana_db_port')."', '-user' => '".$self->o('user_r')."'",
+    #meta_intron_db_head => "'-dbname' => '".$self->o('rnaseq_db_name')."', '-host' => '".$self->o('rnaseq_db_host')."', '-port' => '".$self->o('rnaseq_db_port')."', '-user' => '".$self->o('user_r')."'",
+
+    meta_pipeline_db_head => "'-dbname' => '#expr(#pipe_db#->{-dbname})expr#', '-host' => '#expr(#pipe_db#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#pipe_db#->{-port})expr#', '-user' => '".$self->o('user_r')."'",
+    meta_pipeline_db_head_rw => "'-dbname' => '#expr(#pipe_db#->{-dbname})expr#', '-host' => '#expr(#pipe_db#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#pipe_db#->{-port})expr#', '-user' => '#expr(#pipe_db#->{-user})expr#', '-pass' => '#expr(#pipe_db#->{-pass})expr#'",
+    meta_core_db_head => "'-dbname' => '#expr(#db_conn#->{-dbname})expr#', '-host' => '#expr(#db_conn#->{-host})expr#.ebi.ac.uk', '-port' => '#expr(#db_conn#->{-port})expr#', '-user' => '".$self->o('user_r')."'",
     meta_intron_db_head => "'-dbname' => '".$self->o('rnaseq_db_name')."', '-host' => '".$self->o('rnaseq_db_host')."', '-port' => '".$self->o('rnaseq_db_port')."', '-user' => '".$self->o('user_r')."'",
 
     ensembl_dir => catdir($self->o('enscode_root_dir'), 'ensembl'),
