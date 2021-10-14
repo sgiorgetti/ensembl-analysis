@@ -108,7 +108,7 @@ sub default_options {
 
     do_uniprot_run => 1,
     #uniprot_set => 'havana_human_blast',
-    uniprot_set => 'fish_complete',
+    uniprot_set => 'havana_teleost_blast',
     blast_type => 'ncbi',
     protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
 
@@ -576,7 +576,6 @@ sub pipeline_analyses {
       -rc_name => 'default',
       -flow_into => {
         1 => 'fan_multiple_gene_names',
-        'A->1' => 'load_feature_transcript_name_attributes',
       }
     },
     {
