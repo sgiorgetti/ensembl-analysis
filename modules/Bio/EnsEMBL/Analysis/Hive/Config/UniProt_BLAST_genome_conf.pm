@@ -42,6 +42,9 @@ sub default_options {
     # Preset variables
     ##########################
 
+    # Hive settings
+    'hive_capacity'        => 100,
+
     # UniProt settings
     'uniprot_set'          => 'havana_teleost_blast', # the UniProt set in the UniProtCladeDownloadStatic config to download
     'uniprot_blast_batch_size' => 10, # number of protein sequences per job
@@ -52,7 +55,11 @@ sub default_options {
     'blast_type' => 'ncbi',
     'blast_exe_path' => catfile($self->o('binary_base'), 'tblastn'),
 
+<<<<<<< HEAD
+    protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
+=======
     protein_entry_loc => '/hps/nobackup2/production/ensembl/genebuild/blastdb/uniprot/uniprot_2021_04/entry_loc',
+>>>>>>> 5938c9fde6de1c214923743bf2dc887dd300248b
     load_optimise_script => catfile($self->o('enscode_root_dir'), 'ensembl-analysis', 'scripts', 'genebuild', 'load_external_db_ids_and_optimize_af.pl'),
 
     'blast_db_user'   => $self->o('user'),
@@ -189,6 +196,7 @@ sub pipeline_analyses {
       {
         -logic_name => 'run_uniprot_blast',
         -module     => 'Bio::EnsEMBL::Analysis::Hive::RunnableDB::HiveBlastPepToGenome',
+	-analysis_capacity => 200,
         -parameters => {
                          sequence_table_name => $self->o('uniprot_table_name'),
                          sequence_type => 'peptide',
@@ -307,9 +315,9 @@ sub pipeline_analyses {
 sub resource_classes {
     my $self = shift;
     return {
-      'default' => { LSF => $self->lsf_resource_builder('production-rh74', 900, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'}], [$self->default_options->{'num_tokens'}])},
-      '4GB' => { LSF => $self->lsf_resource_builder('production-rh74', 4000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
-      '8GB' => { LSF => $self->lsf_resource_builder('production-rh74', 8000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
+      'default' => { LSF => $self->lsf_resource_builder('production', 900, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'}], [$self->default_options->{'num_tokens'}])},
+      '4GB' => { LSF => $self->lsf_resource_builder('production', 4000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
+      '8GB' => { LSF => $self->lsf_resource_builder('production', 8000, [$self->default_options->{'pipe_db_host'}, $self->default_options->{'dna_db_host'},$self->default_options->{'blast_db_host'}], undef, 3)},
     }
   }
 

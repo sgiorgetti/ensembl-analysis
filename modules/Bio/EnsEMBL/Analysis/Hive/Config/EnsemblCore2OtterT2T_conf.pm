@@ -1,7 +1,7 @@
 =head1 LICENSE
 
 Copyright [1999-2015] Wellcome Trust Sanger Institute and the EMBL-European Bioinformatics Institute
-Copyright [2016-2022] EMBL-European Bioinformatics Institute
+Copyright [2016-2019] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ use warnings;
 
 use File::Spec::Functions qw(catfile catdir);
 use Bio::EnsEMBL::Analysis::Tools::Utilities qw(get_analysis_settings);
-# This is to be able to use WHEN ELSE
+# This is to enable WHEN ELSE
 use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
 
 use parent ('Bio::EnsEMBL::Analysis::Hive::Config::HiveBaseConfig_conf');
@@ -64,10 +64,14 @@ sub default_options {
   return {
     %{$self->SUPER::default_options()},
 
-    species => 'sus_scrofa',
-    #species => 'clupea_harengus',
+    # Copy service
+    copy_service_uri => "https://services.ensembl.ebi.ac.uk:2000/api/dbcopy/requestjob",
+    username         => $self->o('ENV', 'USER'),
 
-    copy_service_uri => "http://production-services.ensembl.org/api/dbcopy/requestjob",
+    #species => 'sus_scrofa',
+    #species => 'clupea_harengus',
+    species => 'homo_sapiens_gca009914755v4',
+
     base_dir => '/hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/loutre',
     output_dir => catdir($self->o('base_dir'), $self->o('species'), $self->o('db_prefix')),
     blast_db_path => catfile($self->o('output_dir'), $self->o('species').'_softmasked_toplevel.fa'),
@@ -79,14 +83,15 @@ sub default_options {
     pipe_db_host => 'mysql-ens-core-prod-1',
     pipe_db_port => 4524,
 
-    #db_prefix => $self->o('assembly_version'),
-    db_prefix => $self->o('current_release').'_'.$self->o('assembly_version'),
-    pipeline_name => 'loutre_ensembl_'.$self->o('species').'_'.$self->o('db_prefix'),
+    db_prefix => $self->o('assembly_version'),
+    #pipeline_name => 'loutre_ensembl_'.$self->o('species').'_'.$self->o('db_prefix'),
+    pipeline_name => 'hav_ens_'.$self->o('species').'_'.$self->o('db_prefix'),
 
-    assembly_version => 111,
+    # ensro@mysql-ens-sta-5:4684 [homo_sapiens_gca009914755v4_core_107_1] ;# T2T human core DB
+    assembly_version => 1,
     current_release => 107,
-    current_db_host => 'mysql-ens-sta-1-b',
-    current_db_port => 4685,
+    current_db_host => 'mysql-ens-sta-5',
+    current_db_port => 4684,
     #current_db_host => 'mysql-ens-mirror-1',
     #current_db_port => 4240,
 
@@ -94,9 +99,11 @@ sub default_options {
     havana_db_port => 4524,
 
     ensembl_db_name => $self->o('species').'_core_'.$self->o('current_release').'_'.$self->o('assembly_version'),
+    ensembl_db_name => "homo_sapiens_gca009914755v4_core_107_1",
     ensembl_db_host => $self->o('current_db_host'),
     ensembl_db_port => $self->o('current_db_port'),
 
+    do_rnaseq_db => 0,
     rnaseq_gene_db_name => $self->o('species').'_rnaseq_'.$self->o('current_release').'_'.$self->o('assembly_version'),
     rnaseq_gene_db_host => $self->o('current_db_host'),
     rnaseq_gene_db_port => $self->o('current_db_port'),
@@ -109,15 +116,10 @@ sub default_options {
     rnaseq_db_port => $self->o('havana_db_port'),
 
     do_uniprot_run => 1,
-    #uniprot_set => 'havana_human_blast',
+    uniprot_set => 'havana_human_blast',
     #uniprot_set => 'havana_teleost_blast',
-    uniprot_set => 'havana_mammal_blast',
     blast_type => 'ncbi',
-<<<<<<< HEAD
-    protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2021_04/entry_loc',
-=======
-    protein_entry_loc => '/hps/nobackup2/production/ensembl/genebuild/blastdb/uniprot/uniprot_2021_04/entry_loc',
->>>>>>> 5938c9fde6de1c214923743bf2dc887dd300248b
+    protein_entry_loc => '/hps/nobackup/flicek/ensembl/genebuild/blastdb/uniprot/uniprot_2019_04/entry_loc',
 
     meta_pipeline_db_host => $self->o('pipe_db_host'),
     meta_pipeline_db_port => $self->o('pipe_db_port'),
@@ -346,10 +348,36 @@ sub pipeline_analyses {
       -flow_into => {
          1 => ['fan_uniprot_run', 'patch_havana_db'],
       },
-     },
+    },
+#    {
+#        -logic_name        => 'create_havana_db',
+#        -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SqlCmd',
+#        -analysis_capacity => 10,
+#        -batch_size        => 10,
+#        -max_retry_count   => 1,
+#        -parameters        => {
+#             'db_conn' => $self->o('havana_db_uri'),
+#                'sql'     => 'CREATE DATABASE '.$self->o('havana_db_name'),
+#        },
+#        -flow_into => [ 'copy_havana_db' ],
+#        -rc_name => 'default',
+#    },
+#    {
+#        -logic_name      => 'copy_havana_db',
+#        -module          => 'Bio::EnsEMBL::Hive::RunnableDB::DatabaseDumper',
+#        -parameters      => {
+#                 db_conn      => $self->o('ensembl_db'),
+#                 output_db    => $self->o('havana_db'),
+#                 dump_options => '--max_allowed_packet=1024M',
+#        },
+#        -rc_name => '4GB',
+#        -flow_into => {
+#         1 => ['fan_uniprot_run', 'patch_havana_db'],
+#        },
+#     },
      {
       -logic_name => 'fan_uniprot_run',
-      -module     => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
+      -module => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -parameters => {
         cmd => 'if [ #do_uniprot_run# -eq 0 ];then exit 42;fi',
         do_uniprot_run => $self->o('do_uniprot_run'),
@@ -374,7 +402,7 @@ sub pipeline_analyses {
       -rc_name => 'default',
       -max_retry_count => 0,
       -flow_into => {
-        2 => ['dump_softmasked_toplevel'],
+        1 => ['dump_softmasked_toplevel'],
       }
     },
     {
@@ -416,7 +444,7 @@ sub pipeline_analyses {
       -rc_name => 'default',
       -max_retry_count => 0,
       -flow_into => {
-        2 => ['init_uniprot_pipeline'],
+        1 => ['init_uniprot_pipeline'],
       }
     },
     {
@@ -700,6 +728,7 @@ sub pipeline_analyses {
       -parameters => {
         db_conn => $self->o('havana_db'),
         ensembl_scripts => $self->o('ensembl_scripts'),
+        do_rna => $self->o('do_rnaseq_db'),
         cmd => 'perl '.catfile('#ensembl_scripts#', 'meta_coord', 'update_meta_coord.pl')
           .' --host #expr(#db_conn#->{-host})expr#'
           .' --port #expr(#db_conn#->{-port})expr#'
@@ -710,7 +739,8 @@ sub pipeline_analyses {
       },
       -rc_name => 'default',
       -flow_into => {
-        1 => 'create_rnaseq_db',
+        1 => WHEN ('-e #do_rna#' => ['create_rnaseq_db'],
+             ELSE ['write_swissprot_anaysis_config']),
       },
     },
     {
@@ -882,11 +912,15 @@ sub resource_classes {
   return {
     'default'  => { LSF => ['-q production -C0 -M 1000 -R"select[mem>1000] rusage[mem=1000]"',
                     '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
+    '500M'    => {LSF => ['-q production -C0 -M 500 -R "select[mem>500] rusage[mem=500]"',
+                    '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
     '4GB'  => { LSF => ['-q production -C0 -M 4000 -R"select[mem>4000] rusage[mem=4000]"',
                     '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
-    '16GB' => { LSF => ['-q production -C0 -M 16000 -R"select[mem>16000] rusage[mem=16000]"',
+    '16GB' => { LSF => ['-q production -C0 -M 16000 -R"select[mem>16000] rusage[mem16000]"',
                     '-worker_base_temp_dir /hps/nobackup/flicek/ensembl/infrastructure/sgiorgetti/temp']},
   };
 }
 
 1;
+
+
